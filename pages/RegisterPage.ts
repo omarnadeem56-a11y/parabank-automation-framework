@@ -93,4 +93,12 @@ export class RegisterPage extends BasePage {
       }
     }
   }
+
+  // Expose the most recently used credentials (for tests that auto-register)
+  getLastCredentials(): { username: string; password: string } | undefined {
+    if (this.latestUsername && this.latestPassword) {
+      return { username: this.latestUsername, password: this.latestPassword };
+    }
+    return undefined;
+  }
 }
