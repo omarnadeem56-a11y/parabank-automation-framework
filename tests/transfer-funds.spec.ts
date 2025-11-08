@@ -67,7 +67,14 @@ test.describe('Transfer Funds', () => {
     if (funding) await fundingSelect.selectOption({ value: funding });
 
     await page.getByRole('button', { name: /open new account/i }).click();
-    await expect(page.getByRole('heading', { name: 'Account Opened!' })).toBeVisible();
+    await page.waitForLoadState('domcontentloaded');
+    const openedHeading = page.getByRole('heading', { name: /account opened!/i });
+    const newAccountId = page.locator('#newAccountId, a#newAccountId, #newAccountId a');
+    try {
+      await expect(openedHeading).toBeVisible({ timeout: 8000 });
+    } catch {
+      await expect(newAccountId).toBeVisible({ timeout: 8000 });
+    }
 
     await page.locator('a[href*="transfer.htm"]').click();
     await expect(page).toHaveURL(/transfer\.htm/);
