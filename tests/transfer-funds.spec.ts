@@ -41,21 +41,34 @@ test.describe('Transfer Funds', () => {
   async function ensureTwoAccounts(page) {
     await page.locator('a[href*="transfer.htm"]').click();
     await expect(page).toHaveURL(/transfer\.htm/);
-    const from = page.locator('select#fromAccountId');
-    const options = await from.locator('option').all();
-    const values = [];
-    for (const opt of options) {
-      const v = await opt.getAttribute('value');
-      if (v && v.trim()) values.push(v);
-    }
+
+    const fromSelect = page.locator('select#fromAccountId');
+    await fromSelect.waitFor();
+    const values = await page.$$eval(
+      'select#fromAccountId option',
+      els => els.map(e => /** @type {HTMLOptionElement} */(e).value).filter(v => v && v.trim().length > 0)
+    );
     if (new Set(values).size >= 2) return;
+
     await page.locator('a[href*="openaccount.htm"]').click();
     await expect(page).toHaveURL(/openaccount\.htm/);
-    await page.locator('select#type').selectOption({ value: '1' });
-    const fromAcc = values[0] || (await page.locator('select#fromAccountId option').nth(1).getAttribute('value')) || '';
-    if (fromAcc) await page.locator('select#fromAccountId').selectOption({ value: fromAcc });
-    await page.getByRole('button', { name: 'Open New Account' }).click();
+
+    const typeSelect = page.locator('select#type');
+    await typeSelect.waitFor();
+    await typeSelect.selectOption({ value: '1' });
+
+    const fundingSelect = page.locator('select#fromAccountId');
+    await fundingSelect.waitFor();
+    const fundingValues = await page.$$eval(
+      'select#fromAccountId option',
+      els => els.map(e => /** @type {HTMLOptionElement} */(e).value).filter(v => v && v.trim().length > 0)
+    );
+    const funding = fundingValues[0];
+    if (funding) await fundingSelect.selectOption({ value: funding });
+
+    await page.getByRole('button', { name: /open new account/i }).click();
     await expect(page.getByRole('heading', { name: 'Account Opened!' })).toBeVisible();
+
     await page.locator('a[href*="transfer.htm"]').click();
     await expect(page).toHaveURL(/transfer\.htm/);
   }
