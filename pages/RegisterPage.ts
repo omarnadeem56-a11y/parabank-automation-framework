@@ -76,6 +76,17 @@ export class RegisterPage extends BasePage {
           continue;
         }
 
+        const stateRequired = messages.find(m => /state\s+is\s+required/i.test(m));
+        if (stateRequired && attempt < 2) {
+          await this.page.locator(this.state).fill('CA');
+          if (this.latestPassword) {
+            await this.page.locator(this.password).fill(this.latestPassword);
+            await this.page.locator(this.confirm).fill(this.latestPassword);
+          }
+          await this.click(this.registerBtn);
+          continue;
+        }
+
         if (messages.length) {
           throw new Error(`Registration did not succeed. Validation errors: ${messages.join(' | ')}`);
         }
