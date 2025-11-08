@@ -72,9 +72,9 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     const accounts = await overviewPage.getAccountNumbers();
     await overviewPage.clickAccountByNumber(accounts[0]);
 
-    // Verify Account Details page loads (avoid strict mode by using roles)
+    // Verify Account Details page loads and activity section is present
     await expect(page.getByRole('heading', { name: 'Account Details' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Account Activity' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Account Activity' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Error!' })).toHaveCount(0);
     await expect(page.locator('#rightPanel #accountId')).toHaveText(accounts[0]);
   });
