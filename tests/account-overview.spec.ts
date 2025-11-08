@@ -1,13 +1,35 @@
 import { test, expect } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
+import { RegisterPage } from '../pages/RegisterPage';
 import { AccountOverviewPage } from '../pages/AccountOverviewPage';
+import users from '../test-data/users.json';
+
+type Creds = { username: string; password: string };
+let seededCreds: Creds | undefined;
 
 test.describe('AUT-103: Account Overview Page Scenarios', () => {
-  // Skip suite if default credentials are not available
-  if (!process.env.DEFAULT_USER || !process.env.DEFAULT_PASS) {
-    test.skip(true, 'DEFAULT_USER/DEFAULT_PASS not set; skipping account overview tests');
-  }
+  test.beforeAll(async ({ browser }) => {
+    if (process.env.DEFAULT_USER && process.env.DEFAULT_PASS) {
+      seededCreds = { username: process.env.DEFAULT_USER, password: process.env.DEFAULT_PASS };
+      return;
+    }
+
+    const page = await browser.newPage();
+    const home = new HomePage(page);
+    const register = new RegisterPage(page);
+
+    // Register a new user if no default credentials provided
+    await home.navigateTo('/');
+    await home.goToRegister();
+    const user = users[0];
+    await register.registerUser(user);
+    await register.verifyRegistrationSuccess();
+    const last = register.getLastCredentials();
+    if (!last) throw new Error('Failed to retrieve newly created credentials');
+    seededCreds = last;
+    await page.close();
+  });
 
   test.beforeEach(async ({ page }) => {
     const homePage = new HomePage(page);
@@ -17,8 +39,9 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     await homePage.navigateTo('/');
     await homePage.goToLogin();
 
-    // Login using default env credentials
-    await loginPage.login(process.env.DEFAULT_USER!, process.env.DEFAULT_PASS!);
+    // Login using env or freshly registered credentials
+    if (!seededCreds) throw new Error('Credentials not initialized');
+    await loginPage.login(seededCreds.username, seededCreds.password);
 
     // Ensure login is successful before running tests
     await expect(page.locator('h1.title')).toHaveText('Accounts Overview');
@@ -53,4 +76,3 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     await expect(page.locator('#accountId')).toHaveText(accounts[0]);
   });
 });
-
