@@ -31,12 +31,14 @@ export default defineConfig({
   use: {
     baseURL,
     browserName: 'chromium',
-    headless: String(process.env.HEADLESS || '').toLowerCase() === 'true' ? true : false,
+    // Force headless in CI; locally respect HEADLESS env (default false)
+    headless: !!process.env.CI || String(process.env.HEADLESS || '').toLowerCase() === 'true',
     // Visibility & debugging defaults (env-overridable)
     trace: (process.env.TRACE as any) || 'on',
     screenshot: (process.env.SCREENSHOT as any) || 'only-on-failure',
     video: (process.env.VIDEO as any) || 'on-first-retry',
-    launchOptions: { slowMo: Number(process.env.SLOW_MO || 200) },
+    // No slowMo in CI unless explicitly requested
+    launchOptions: { slowMo: Number(process.env.SLOW_MO || (process.env.CI ? 0 : 200)) },
   },
 
   projects: [
