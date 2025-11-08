@@ -44,7 +44,8 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     await loginPage.login(seededCreds.username, seededCreds.password);
 
     // Ensure login is successful before running tests
-    await expect(page.locator('h1.title')).toHaveText('Accounts Overview');
+    await expect(page.getByRole('heading', { name: 'Accounts Overview' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Error!' })).toHaveCount(0);
   });
 
   test('AUT-103: Verify Accounts Overview Page loads correctly', async ({ page }) => {
