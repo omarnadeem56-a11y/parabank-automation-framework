@@ -18,7 +18,10 @@ export class AccountOverviewPage extends BasePage {
   }
 
   async clickAccountByNumber(accountNumber: string) {
-    await this.page.getByRole('link', { name: accountNumber }).click();
+    await Promise.all([
+      this.page.waitForLoadState('domcontentloaded'),
+      this.page.getByRole('link', { name: accountNumber }).click(),
+    ]);
+    await expect(this.page.getByRole('heading', { name: 'Account Details' })).toBeVisible();
   }
 }
-
