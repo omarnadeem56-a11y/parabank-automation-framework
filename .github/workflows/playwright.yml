@@ -23,9 +23,14 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
-      - name: Run Playwright tests
+      - name: Run Playwright tests (remote)
         env:
-          TEST_ENV: local
+          CI: true
+          TEST_ENV: remote
+          BASE_URL: https://parabank.parasoft.com/parabank
+          TRACE: retain-on-failure
+          SLOW_MO: '0'
+          HEADLESS: 'true'
         run: |
           npm run test -- --reporter=line,allure-playwright
 
@@ -37,4 +42,3 @@ jobs:
           path: |
             test-results/**
             allure-results/**
-
