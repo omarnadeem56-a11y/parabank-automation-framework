@@ -19,8 +19,7 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     const home = new HomePage(page);
     const register = new RegisterPage(page);
 
-    // Register a new user if no default credentials provided
-    await home.navigateTo('/');
+        await home.navigateTo('/');
     await home.goToRegister();
     const user = users[0];
     await register.registerUser(user);
@@ -35,47 +34,39 @@ test.describe('AUT-103: Account Overview Page Scenarios', () => {
     const homePage = new HomePage(page);
     const loginPage = new LoginPage(page);
 
-    // Navigate to ParaBank home (baseURL from config/env)
-    await homePage.navigateTo('/');
+        await homePage.navigateTo('/');
     await homePage.goToLogin();
 
-    // Login using env or freshly registered credentials
-    if (!seededCreds) throw new Error('Credentials not initialized');
+        if (!seededCreds) throw new Error('Credentials not initialized');
     await loginPage.login(seededCreds.username, seededCreds.password);
 
-    // Ensure login is successful before running tests
-    await expect(page.getByRole('heading', { name: 'Accounts Overview' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Accounts Overview' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Error!' })).toHaveCount(0);
   });
 
   test('AUT-103: Verify Accounts Overview Page loads correctly', async ({ page }) => {
     const overviewPage = new AccountOverviewPage(page);
 
-    // Verify the page has loaded
-    await overviewPage.verifyLoaded();
+        await overviewPage.verifyLoaded();
 
-    // Retrieve list of account numbers
-    const accounts = await overviewPage.getAccountNumbers();
+        const accounts = await overviewPage.getAccountNumbers();
     console.log('Accounts found:', accounts);
 
-    // Verify at least one account is present
-    expect(accounts.length).toBeGreaterThan(0);
+        expect(accounts.length).toBeGreaterThan(0);
   });
 
   test('AUT-103: Verify user can click an account to view details', async ({ page }) => {
     const overviewPage = new AccountOverviewPage(page);
 
-    // Wait for overview page to load
-    await overviewPage.verifyLoaded();
+        await overviewPage.verifyLoaded();
 
-    // Click on first account from the list
-    const accounts = await overviewPage.getAccountNumbers();
+        const accounts = await overviewPage.getAccountNumbers();
     await overviewPage.clickAccountByNumber(accounts[0]);
 
-    // Verify Account Details page loads and activity section is present
-    await expect(page.getByRole('heading', { name: 'Account Details' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Account Details' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Account Activity' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Error!' })).toHaveCount(0);
     await expect(page.locator('#rightPanel #accountId')).toHaveText(accounts[0]);
   });
 });
+

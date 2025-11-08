@@ -1,7 +1,4 @@
-// pages/BasePage.ts
 import { Page, expect, Locator } from '@playwright/test';
-
-
 export class BasePage {
   readonly page: Page;
   readonly baseUrl: string;

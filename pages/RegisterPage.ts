@@ -21,16 +21,12 @@ export class RegisterPage extends BasePage {
   private generateUniqueUsername(): string {
     const stamp = Date.now().toString(36);
     const rand = Math.random().toString(36).slice(2, 5);
-    // Keep username compact to avoid server-side truncation collisions
     return `auto_${stamp}${rand}`.slice(0, 20);
   }
 
   async registerUser(userData: any) {
-    // Always use a compact unique username to avoid collisions and truncation
     const uniqueUsername = this.generateUniqueUsername();
-    // ParaBank expects numeric zip; coerce if needed
     const zip = /^\d+$/.test(userData.zip) ? userData.zip : '12345';
-    // ParaBank likely requires unique SSN; generate a valid pattern XXX-XX-XXXX
     const now = Date.now().toString();
     const ssnDigits = now.slice(-9).padStart(9, '0');
     const ssnUnique = `${ssnDigits.slice(0,3)}-${ssnDigits.slice(3,5)}-${ssnDigits.slice(5)}`;
@@ -55,13 +51,11 @@ export class RegisterPage extends BasePage {
     const header = this.page.locator(this.successMsg);
     await expect(header).toBeVisible();
 
-    // Attempt up to 3 times in case the username already exists
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         await expect(header).toContainText('Welcome', { timeout: 1000 });
-        return; // success
+        return;
       } catch {
-        // Check for validation errors
         const errors = this.page.locator('.error, [id$=".errors"]');
         const count = await errors.count();
         const messages: string[] = [];
@@ -71,30 +65,25 @@ export class RegisterPage extends BasePage {
 
         const duplicateUser = messages.find(m => /username.*exists/i.test(m));
         if (duplicateUser && attempt < 2) {
-          // Generate a short unique username and retry submit
           const newUsername = this.generateUniqueUsername();
           await this.page.locator(this.username).fill(newUsername);
           this.latestUsername = newUsername;
-          // Some servers clear password fields after error; ensure we re-fill
           if (this.latestPassword) {
             await this.page.locator(this.password).fill(this.latestPassword);
             await this.page.locator(this.confirm).fill(this.latestPassword);
           }
           await this.click(this.registerBtn);
-          // Loop and re-check header
           continue;
         }
 
         if (messages.length) {
           throw new Error(`Registration did not succeed. Validation errors: ${messages.join(' | ')}`);
         }
-        // No specific errors found; rethrow and fail
         throw new Error('Registration did not succeed, and no validation messages were found.');
       }
     }
   }
 
-  // Expose the most recently used credentials (for tests that auto-register)
   getLastCredentials(): { username: string; password: string } | undefined {
     if (this.latestUsername && this.latestPassword) {
       return { username: this.latestUsername, password: this.latestPassword };
