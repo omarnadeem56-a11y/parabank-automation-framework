@@ -1,0 +1,14 @@
+[
+  {
+    "firstName": "Omar",
+    "lastName": "Nadeem",
+    "address": "123 Main Street",
+    "city": "Birmingham",
+    "state": "West Midlands",
+    "zip": "B14",
+    "phone": "07123456789",
+    "ssn": "123-45-6789",
+    "username": "omar_auto_1",
+    "password": "pass123"
+  }
+]
